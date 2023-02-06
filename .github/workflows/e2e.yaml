@@ -26,7 +26,7 @@ jobs:
 
       - name: Tests
         continue-on-error: false
-        run: HOME=/root pnpm test
+        run: HOME=/root pnpm test:ci
 
       - name: Upload HTML report as artifact. To troubleshoot failures, extract .zip and double-click index.html.
         uses: actions/upload-artifact@v3
