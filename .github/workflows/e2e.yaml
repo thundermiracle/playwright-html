@@ -1,0 +1,58 @@
+name: playwright-html-e2e
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+jobs:
+  basic-tests:
+    name: "basic visual comparison tests"
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.30.0-focal
+    steps:
+      - uses: actions/checkout@v3
+      
+      - run: corepack enable
+          
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts
+
+      - name: Tests
+        continue-on-error: false
+        run: HOME=/root pnpm test
+
+      - name: Upload HTML report as artifact. To troubleshoot failures, extract .zip and double-click index.html.
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: basic-tests
+          path: playwright-report
+
+  publishTestResults:
+    name: "Publish Test Results to to testresults.marcusfelling.com"
+    needs:
+      [
+        basic-tests,
+      ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        id: download
+
+      - name: Publish to GH Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{steps.download.outputs.download-path}}
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
