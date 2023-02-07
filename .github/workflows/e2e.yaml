@@ -36,7 +36,7 @@ jobs:
           path: playwright-report
 
   publishTestResults:
-    name: "Publish Test Results to to testresults.marcusfelling.com"
+    name: "Publish Test Results to to Github Pages"
     needs:
       [
         basic-tests,
